@@ -103,7 +103,7 @@ def converter_para_excel(df):
 # --- Interface Visual ---
 
 st.title("🔍 Máquina de Leads do LinkedIn")
-st.markdown("Busque, acumule resultados e baixe tudo em uma única planilha.")
+st.markdown("Busque, acumule resultados e baixe tudo em uma única planilha. Chave API Serper: 902a25118f1f65d63bef8f294d747d3624642da1")
 
 with st.expander("⚙️ Configurações de API", expanded=not bool(st.session_state["api_key"])):
     nova_api_key = st.text_input("Sua API Key do Serper:", type="password", value=st.session_state["api_key"])
