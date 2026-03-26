@@ -37,7 +37,6 @@ def abrir_tutorial():
 
 # --- GERENCIADOR DE MEMÓRIA (SESSION STATE) ---
 if "api_key" not in st.session_state:
-    # A chave já entra aqui como padrão
     st.session_state["api_key"] = "902a25118f1f65d63bef8f294d747d3624642da1"
 if "leads_salvos" not in st.session_state:
     st.session_state["leads_salvos"] = []
@@ -151,18 +150,19 @@ def converter_para_excel(df):
 
 # --- Interface Visual ---
 
-# Layout do Cabeçalho com o botão de Ajuda
-col_titulo, col_ajuda = st.columns([4, 1])
+# Layout do Cabeçalho com os botões (Ajuda e Link Externo)
+col_titulo, col_botoes = st.columns([4, 1])
 with col_titulo:
     st.title("🚀 Máquina de Leads Pro")
     st.markdown("Busca avançada, extração de cargos, gerador de e-mails e dashboard analítico.")
-with col_ajuda:
-    st.write("") # Espaçamento para alinhar
-    st.write("")
+with col_botoes:
+    # O st.write vazio ajuda a empurrar os botões um pouco para baixo para alinhar com o título
+    st.write("") 
     if st.button("ℹ️ Como Usar", use_container_width=True):
-        abrir_tutorial() # Chama o popup!
+        abrir_tutorial()
+    # Adicionando o botão de link para o B2ScraperInsta
+    st.link_button("📸 Ir para B2ScraperInsta", "https://b2scraperinsta.streamlit.app/", use_container_width=True)
 
-# O menu da API voltou, mas já vem preenchido!
 with st.expander("⚙️ Configurações de API", expanded=not bool(st.session_state["api_key"])):
     nova_api_key = st.text_input("Sua API Key do Serper:", type="password", value=st.session_state["api_key"])
     if nova_api_key:
