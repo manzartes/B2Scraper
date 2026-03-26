@@ -16,25 +16,28 @@ def abrir_tutorial():
     st.markdown("""
     Bem-vindo(a)! Este software minera dados do LinkedIn usando o Google. Siga os passos:
 
-    **1️⃣ Faça a Busca Base**
+    **1️⃣ Configure a Chave (Opcional)**
+    * A sua chave padrão já está configurada. Se precisar trocar, abra a sanfona "Configurações de API" e insira a nova.
+
+    **2️⃣ Faça a Busca Base**
     * Digite o nome da **Empresa** (ex: *Nubank*, *Petrobras*).
     * (Opcional) Digite a **Localidade** para restringir (ex: *São Paulo*, *Brasil*).
     * Clique em "Iniciar Nova Busca". O robô vai ler as primeiras 5 páginas do Google.
 
-    **2️⃣ Aumente sua Lista (Minerar Mais)**
+    **3️⃣ Aumente sua Lista (Minerar Mais)**
     * O Google limita os resultados iniciais. Se quiser mais leads da mesma empresa, clique no botão cinza **"➕ Pesquisar Mais 50 Leads"**. Ele vai folhear as próximas páginas do Google e somar à sua lista.
 
-    **3️⃣ Filtre e Descubra E-mails**
+    **4️⃣ Filtre e Descubra E-mails**
     * Use o campo **Filtrar por Cargo** para limpar a tabela (ex: digite "Diretor" para ver só os diretores).
     * Use o campo **Gerar E-mails** digitando o domínio da empresa (ex: *empresa.com.br*). O sistema vai usar o nome da pessoa para criar os 3 padrões de e-mail corporativo mais comuns do mercado.
 
-    **4️⃣ Exporte para o CRM**
+    **5️⃣ Exporte para o CRM**
     * Com a lista pronta e filtrada, clique em **Baixar Planilha Excel** ou **CSV** para salvar os dados no seu computador e importar na sua ferramenta de e-mail ou CRM.
     """)
 
 # --- GERENCIADOR DE MEMÓRIA (SESSION STATE) ---
-# CHAVE API INSERIDA DIRETAMENTE AQUI 👇
 if "api_key" not in st.session_state:
+    # A chave já entra aqui como padrão
     st.session_state["api_key"] = "902a25118f1f65d63bef8f294d747d3624642da1"
 if "leads_salvos" not in st.session_state:
     st.session_state["leads_salvos"] = []
@@ -159,6 +162,12 @@ with col_ajuda:
     if st.button("ℹ️ Como Usar", use_container_width=True):
         abrir_tutorial() # Chama o popup!
 
+# O menu da API voltou, mas já vem preenchido!
+with st.expander("⚙️ Configurações de API", expanded=not bool(st.session_state["api_key"])):
+    nova_api_key = st.text_input("Sua API Key do Serper:", type="password", value=st.session_state["api_key"])
+    if nova_api_key:
+        st.session_state["api_key"] = nova_api_key
+
 with st.form("busca_nova"):
     st.subheader("Nova Busca")
     col1, col2 = st.columns(2)
@@ -171,7 +180,7 @@ with st.form("busca_nova"):
 
 if btn_nova_busca:
     if not st.session_state["api_key"]:
-        st.error("Erro na API Key. Verifique as configurações do código.")
+        st.error("Insira sua API Key do Serper acima.")
     elif not empresa_alvo:
         st.warning("Digite o nome de uma empresa.")
     else:
