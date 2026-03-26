@@ -8,7 +8,7 @@ import unicodedata
 import re
 
 # Configuração da página
-st.set_page_config(page_title="Buscador de Funcionários", page_icon="🔍", layout="wide")
+st.set_page_config(page_title="Buscador de Funcionários", page_icon="🚀", layout="wide")
 
 # --- POPUP DE TUTORIAL (MODAL) ---
 @st.dialog("📖 Como usar a Máquina de Leads")
