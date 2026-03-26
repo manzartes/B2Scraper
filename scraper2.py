@@ -10,6 +10,32 @@ import re
 # Configuração da página
 st.set_page_config(page_title="Buscador de Funcionários", page_icon="🔍", layout="wide")
 
+# --- POPUP DE TUTORIAL (MODAL) ---
+@st.dialog("📖 Como usar a Máquina de Leads")
+def abrir_tutorial():
+    st.markdown("""
+    Bem-vindo(a)! Este software minera dados do LinkedIn usando o Google. Siga os passos:
+
+    **1️⃣ Configure a Chave (Apenas na primeira vez)**
+    * Abra a sanfona "Configurações de API".
+    * Insira a chave do Serper.dev (peça ao administrador se não tiver uma).
+
+    **2️⃣ Faça a Busca Base**
+    * Digite o nome da **Empresa** (ex: *Nubank*, *Petrobras*).
+    * (Opcional) Digite a **Localidade** para restringir (ex: *São Paulo*, *Brasil*).
+    * Clique em "Iniciar Nova Busca". O robô vai ler as primeiras 5 páginas do Google.
+
+    **3️⃣ Aumente sua Lista (Minerar Mais)**
+    * O Google limita os resultados iniciais. Se quiser mais leads da mesma empresa, clique no botão cinza **"➕ Pesquisar Mais 50 Leads"**. Ele vai folhear as próximas páginas do Google e somar à sua lista.
+
+    **4️⃣ Filtre e Descubra E-mails**
+    * Use o campo **Filtrar por Cargo** para limpar a tabela (ex: digite "Diretor" para ver só os diretores).
+    * Use o campo **Gerar E-mails** digitando o domínio da empresa (ex: *empresa.com.br*). O sistema vai usar o nome da pessoa para criar os 3 padrões de e-mail corporativo mais comuns do mercado.
+
+    **5️⃣ Exporte para o CRM**
+    * Com a lista pronta e filtrada, clique em **Baixar Planilha Excel** ou **CSV** para salvar os dados no seu computador e importar na sua ferramenta de e-mail ou CRM.
+    """)
+
 # --- GERENCIADOR DE MEMÓRIA (SESSION STATE) ---
 if "api_key" not in st.session_state:
     st.session_state["api_key"] = ""
@@ -88,7 +114,6 @@ def buscar_funcionarios_serper(empresa, api_key, localidade="", pagina_inicial=1
 # --- FUNÇÕES DE PROCESSAMENTO "ENTERPRISE" ---
 
 def extrair_nome_cargo(texto):
-    """Tenta separar o nome do cargo usando os hífens que o Google traz."""
     partes = texto.replace(" | ", " - ").split(" - ")
     nome = partes[0].strip()
     cargo = partes[1].strip() if len(partes) > 1 else "Não identificado"
@@ -99,7 +124,6 @@ def remover_acentos(texto):
     return re.sub(r'[^a-zA-Z\s]', '', texto_normalizado).lower()
 
 def gerar_emails(nome, dominio):
-    """Gera combinações lógicas de e-mail corporativo."""
     if not dominio:
         return ""
     nome_limpo = remover_acentos(nome)
@@ -127,8 +151,16 @@ def converter_para_excel(df):
 
 # --- Interface Visual ---
 
-st.title("🚀 Máquina de Leads Pro")
-st.markdown("Busca avançada, extração de cargos, gerador de e-mails e dashboard analítico.")
+# Layout do Cabeçalho com o botão de Ajuda
+col_titulo, col_ajuda = st.columns([4, 1])
+with col_titulo:
+    st.title("🚀 Máquina de Leads Pro")
+    st.markdown("Busca avançada, extração de cargos, gerador de e-mails e dashboard analítico.")
+with col_ajuda:
+    st.write("") # Espaçamento para alinhar
+    st.write("")
+    if st.button("ℹ️ Como Usar", use_container_width=True):
+        abrir_tutorial() # Chama o popup!
 
 with st.expander("⚙️ Configurações de API", expanded=not bool(st.session_state["api_key"])):
     nova_api_key = st.text_input("Sua API Key do Serper:", type="password", value=st.session_state["api_key"])
@@ -167,11 +199,9 @@ if btn_nova_busca:
 if len(st.session_state["leads_salvos"]) > 0:
     st.divider()
     
-    # Removemos duplicatas da memória bruta
     leads_unicos = [dict(t) for t in {tuple(d.items()) for d in st.session_state["leads_salvos"]}]
     df_base = pd.DataFrame(leads_unicos)
     
-    # Processamento Automático (Separar Nome e Cargo)
     df_base[['Nome', 'Cargo']] = df_base['Nome Bruto'].apply(extrair_nome_cargo)
     
     st.subheader("🎛️ Refinar e Enriquecer Dados")
@@ -181,18 +211,14 @@ if len(st.session_state["leads_salvos"]) > 0:
     with col_dominio:
         dominio_email = st.text_input("📧 Gerar E-mails (Digite o domínio):", placeholder="Ex: nubank.com.br")
 
-    # Aplicando o Filtro Dinâmico
     df_filtrado = df_base.copy()
     if filtro_cargo:
-        # Filtra ignorando letras maiúsculas/minúsculas
         df_filtrado = df_filtrado[df_filtrado['Cargo'].str.contains(filtro_cargo, case=False, na=False) | 
                                   df_filtrado['Nome Bruto'].str.contains(filtro_cargo, case=False, na=False)]
     
-    # Gerador de Emails
     if dominio_email:
         df_filtrado['E-mails Sugeridos'] = df_filtrado['Nome'].apply(lambda x: gerar_emails(x, dominio_email))
     
-    # Reorganizando as colunas para ficar bonito
     colunas_finais = ['Nome', 'Cargo']
     if dominio_email:
         colunas_finais.append('E-mails Sugeridos')
@@ -222,7 +248,6 @@ if len(st.session_state["leads_salvos"]) > 0:
 
     with col_grafico:
         st.caption("Top 10 Cargos Encontrados")
-        # Conta os cargos (ignorando os "Não identificados") para fazer o gráfico
         cargos_validos = df_base[df_base['Cargo'] != "Não identificado"]
         top_cargos = cargos_validos['Cargo'].value_counts().head(10)
         st.bar_chart(top_cargos)
