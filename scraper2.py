@@ -150,7 +150,7 @@ def converter_para_excel(df):
 
 # --- Interface Visual ---
 
-# Layout do Cabeçalho com os botões (Ajuda e Link Externo)
+# Layout do Cabeçalho com os botões (Ajuda e Links Externos)
 col_titulo, col_botoes = st.columns([4, 1])
 with col_titulo:
     st.title("🚀 Máquina de Leads Pro")
@@ -160,8 +160,9 @@ with col_botoes:
     st.write("") 
     if st.button("ℹ️ Como Usar", use_container_width=True):
         abrir_tutorial()
-    # Adicionando o botão de link para o B2ScraperInsta
-    st.link_button("📸 Ir para B2ScraperInsta", "https://b2scraperinsta.streamlit.app/", use_container_width=True)
+    # Adicionando os botões de link para o Hub
+    st.link_button("📸 Qualificador Insta", "https://b2scraperinsta.streamlit.app/", use_container_width=True)
+    st.link_button("🕵️ Dossiê ABM", "https://b2scraperweb.streamlit.app/", use_container_width=True)
 
 with st.expander("⚙️ Configurações de API", expanded=not bool(st.session_state["api_key"])):
     nova_api_key = st.text_input("Sua API Key do Serper:", type="password", value=st.session_state["api_key"])
